@@ -3,6 +3,8 @@ import 'semantic-ui-css/semantic.min.css'
 import { Button, Loader, Segment, Dimmer, Form, Input } from 'semantic-ui-react';
 import Cookies from 'universal-cookie';
 import database from '../firebase';
+import { ref, set, onValue } from "firebase/database";
+
 
 
 class SignUpForm extends Component{
@@ -33,10 +35,11 @@ class SignUpForm extends Component{
       cookies.set('signedIn', this.state.username, { path: '/' });
       console.log("Signed In!");
       
-      database.ref("user").set({
-        name: this.state.username,
+      set(ref(database, 'PaidParking/Operators/' + this.state.username), {
+        username: this.state.username,
         password: this.state.password,
-      }).catch(alert);
+        loggedIn: Date.now()
+      });
 
       this.props.handler();
     }
