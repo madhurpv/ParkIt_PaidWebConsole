@@ -3,7 +3,7 @@ import 'semantic-ui-css/semantic.min.css'
 import { Button, Loader, Segment, Dimmer, Form, Input, Container, Table, Header, Menu, Divider, Grid, Message, Confirm } from 'semantic-ui-react';
 import Cookies from 'universal-cookie';
 import database from '../firebase';
-import { ref, set, onValue } from "firebase/database";
+import { ref, set, onValue, child, get, update  } from "firebase/database";
 
 
 class MainPage extends Component{
@@ -12,7 +12,7 @@ class MainPage extends Component{
     super(props);
 
     this.state = {
-      vehicleCount: 0,
+      currentVehicleCount: 0,
       enterVehicleState: 'MH',
       enterVehicleRegion: '01',
       enterVehicleTime: 'AA',
@@ -29,15 +29,45 @@ class MainPage extends Component{
   }
 
 
-  componentDidMount(){
+  async componentDidMount(){
     console.log("Firebase Data Start")
-    onValue(ref(database, 'PaidParking/Operators'), (snapshot) => {
+    /*await onValue(ref(database, 'PaidParking/Operators'), (snapshot) => {
       const data = snapshot.val();
       console.log("Firebase Data", data)
       console.log("Firebase Data 2 :", data.Hello.loggedIn)
+    });*/
+
+    const cookies = new Cookies();
+    onValue(ref(database, 'PaidParking/Operators/' + cookies.get('signedIn') + "/currentVehicles"), (snapshot) => {
+      var data = snapshot.val();
+      if(parseInt(data) === NaN || data === null){
+        this.setState({ currentVehicleCount: 0});
+      }
+      else{
+        this.setState({ currentVehicleCount: parseInt(data)}, () => {
+          console.log("The state has been set : ", this.state.currentVehicleCount);
+          this.setState({ currentVehicleCount: parseInt(data) })
+        })
+      }
+      console.log("Firebase Vehicles", data)
     });
 
+    /*const dbRef = ref(database);
+    const cookies = new Cookies();
+    get(child(dbRef, 'PaidParking/Operators/' + cookies.get('signedIn') + "/currentVehicles")).then((snapshot) => {
+      if (snapshot.exists()) {
+        console.log(snapshot.val());
+        this.setState({ currentVehicleCount: parseInt(snapshot.val())});
+      } else {
+        console.log("No data available");
+      }
+    }).catch((error) => {
+      console.error(error);
+    });*/
   }
+
+
+
 
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value });
@@ -63,26 +93,39 @@ class MainPage extends Component{
 
   
   
-  increaseVehicleCount = (e) => {
+  increasecurrentVehicleCount = (e) => {
     e.preventDefault();
+    const cookies = new Cookies();
     this.setState((prevState) => ({
-      vehicleCount: prevState.vehicleCount + 1,
+      currentVehicleCount: prevState.currentVehicleCount + 1,
     }));
-    console.log("Vehicles :", this.state.vehicleCount)
+    update(ref(database, 'PaidParking/Operators/' + cookies.get('signedIn')), {
+      currentVehicles: parseInt(this.state.currentVehicleCount)+1
+    });
+    console.log("Vehicles :", this.state.currentVehicleCount)
   }
 
-  decreaseVehicleCount = (e) => {
+  decreasecurrentVehicleCount = (e) => {
     e.preventDefault();
-    if(this.state.vehicleCount >= 1){
+    const cookies = new Cookies();
+    if(this.state.currentVehicleCount >= 1){
       this.setState((prevState) => ({
-        vehicleCount: prevState.vehicleCount - 1,
+        currentVehicleCount: prevState.currentVehicleCount - 1,
       }));
+      update(ref(database, 'PaidParking/Operators/' + cookies.get('signedIn')), {
+        currentVehicles: parseInt(this.state.currentVehicleCount)-1
+      });
     }
-    console.log("Vehicles :", this.state.vehicleCount)
-    /*set(ref(database, 'users/'), {
-      username: this.state.vehicleCount,
-      password: "this.state.password"
-    });*/
+    console.log("Vehicles :", this.state.currentVehicleCount)
+  }
+
+  changecurrentVehicleCount = (e) => {
+    e.preventDefault();
+    const cookies = new Cookies();
+    this.setState({ currentVehicleCount: e.target.value })
+    update(ref(database, 'PaidParking/Operators/' + cookies.get('signedIn')), {
+      currentVehicles: parseInt(e.target.value)
+    });
   }
 
   addVehicle = (e) => {
@@ -114,14 +157,14 @@ class MainPage extends Component{
               </Grid.Column>
 
               <Grid.Column>
-                  <Button color='blue' size='massive' onClick={this.increaseVehicleCount}>+</Button>
+                  <Button color='blue' size='massive' onClick={this.increasecurrentVehicleCount}>+</Button>
                   <Input 
                     style={{width: 130, margin: 15}} 
                     type='numeric' 
-                    value={this.state.vehicleCount} 
+                    value={this.state.currentVehicleCount} 
                     size='massive'
-                    onChange={event => this.setState({ vehicleCount: event.target.value })} />
-                  <Button color='violet' size='massive' onClick={this.decreaseVehicleCount}>-</Button>
+                    onChange={this.changecurrentVehicleCount} />
+                  <Button color='violet' size='massive' onClick={this.decreasecurrentVehicleCount}>-</Button>
               </Grid.Column>
 
               <Grid.Column>
@@ -173,7 +216,7 @@ class MainPage extends Component{
                   onChange={event => this.setState({ exitVehicleLastNumber: event.target.value })}/>
 
                 <center>
-                  <Button color='green' size='massive' onClick={this.decreaseVehicleCount}>ENTER</Button>
+                  <Button color='green' size='massive' onClick={this.decreasecurrentVehicleCount}>ENTER</Button>
                 </center>
               </Grid.Column>
 
@@ -215,7 +258,7 @@ class MainPage extends Component{
                   onChange={event => this.setState({ enterVehicleLastNumber: event.target.value })}/>
 
                 <center>
-                  <Button color='red' size='massive' onClick={this.decreaseVehicleCount}>EXIT</Button>
+                  <Button color='red' size='massive' onClick={this.decreasecurrentVehicleCount}>EXIT</Button>
                 </center>
               </Grid.Column>
 
