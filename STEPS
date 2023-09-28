@@ -2,5 +2,5 @@ npm run start
 
 git add -u
 git commit
-ESC + :wq + 2 times ENTER
+ADD MESSAGE + ESC + :wq + 2 times ENTER
 git push -u origin master
