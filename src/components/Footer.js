@@ -5,7 +5,7 @@ import { Tab, Form, Button, Grid, Icon } from "semantic-ui-react";
 
 export default () => {
     return(
-        <Menu style={{ marginTop: '100px' , bottom: '0px'}} text>
+        <Menu style={{ marginTop: '30px' , bottom: '10px'}} text>
             <Menu.Item>
                 About Us <br />
                 We are a company, ParkIt, which provides parking slots!

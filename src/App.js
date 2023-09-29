@@ -4,9 +4,10 @@ import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css'
 import { Button, Loader, Segment, Dimmer, Form, Input } from 'semantic-ui-react';
 import Cookies from 'universal-cookie';
-import SignUpForm from './components/SignUpForm';
 import Layout from './components/Layout';
 import MainPage from './components/MainPage';
+import LogInForm from './components/LogInForm';
+import SignUpForm from './components/SignUpForm';
 
 
 class App extends Component{
@@ -16,7 +17,8 @@ class App extends Component{
 
     this.state = {
       isLoading : true,
-      previousSignIn : false
+      previousSignIn : false,
+      newSignIn: false,
     }
 
   }
@@ -39,6 +41,12 @@ class App extends Component{
     console.log("Signed in")
   };
 
+  handlerForNewSignUpForm = () => {
+    const cookies = new Cookies();
+    this.setState({ newSignIn: true })
+    //console.log("Signed in")
+  };
+
 
 
   render(){
@@ -56,12 +64,23 @@ class App extends Component{
         
       )
     }
-    else if(this.state.isLoading === false && this.state.previousSignIn === false){ // Not signed in
+    else if(this.state.isLoading === false && this.state.previousSignIn === false && this.state.newSignIn === true){ // New account creation
       return(
         <Layout>
           <SignUpForm handler={() => {
             this.handlerForSignUpForm();
-          }}/>
+            }}/>
+        </Layout>
+      )
+    }
+    else if(this.state.isLoading === false && this.state.previousSignIn === false){ // Not signed in
+      return(
+        <Layout>
+          <LogInForm handler={() => {
+            this.handlerForSignUpForm();
+            }}
+            newSignInHandler={() => { this.handlerForNewSignUpForm();}}
+          />
         </Layout>
       )
     }
