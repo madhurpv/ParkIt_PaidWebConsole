@@ -141,10 +141,6 @@ class MainPage extends Component {
   };
 
 
-  addClick() {
-    this.setState(prevState => ({ futureVehicles: [...prevState.futureVehicles, ''] }))
-  }
-
   vehicleEnteredClick(i) {
     this.setState({ showConfirmationVehicleEntered: true })
     this.setState({ showConfirmationVehicleEnteredIndex: i })
@@ -220,10 +216,16 @@ class MainPage extends Component {
   changecurrentVehicleCount = (e) => {
     e.preventDefault();
     const cookies = new Cookies();
-    this.setState({ currentVehicleCount: e.target.value })
-    update(ref(database, 'PaidParking/Operators/' + cookies.get('signedIn')), {
-      currentVehicles: parseInt(e.target.value)
-    });
+    console.log("ChangedValue = ", e.target.value);
+    if(e.target.value !== NaN && e.target.value !== undefined && e.target.value !== null && e.target.value !== '' && e.target.value >= 0 && this.state.maxCapacity - this.state.totalBooking - e.target.value >= 0){
+      this.setState({ currentVehicleCount: e.target.value })
+      update(ref(database, 'PaidParking/Operators/' + cookies.get('signedIn')), {
+        currentVehicles: parseInt(e.target.value)
+      });
+    }
+    else{
+      this.setState({ currentVehicleCount: '' })
+    }
   }
 
 
@@ -307,7 +309,7 @@ class MainPage extends Component {
   render() {
     return (
       <div>
-        <Container style={{ padding: '5em 0em' }}>
+        <Container style={{ padding: '2em 0em' }}>
           <Header as='h2'>Dashboard</Header>
           <Grid columns={3} r celled='internally'>
             <Grid.Row>
@@ -318,7 +320,7 @@ class MainPage extends Component {
                 <Button color='blue' size='massive' onClick={this.increasecurrentVehicleCount}>+</Button>
                 <Input
                   style={{ width: 130, margin: 15 }}
-                  type='numeric'
+                  type='number'
                   value={this.state.currentVehicleCount}
                   size='massive'
                   onChange={this.changecurrentVehicleCount} />
@@ -332,10 +334,9 @@ class MainPage extends Component {
 
             <Grid.Row>
               <Grid.Column>
-                <div style={{ height: '290px', overflowY: 'scroll' }}>
+                <div style={{ height: '200px', overflowY: 'scroll' }}>
                   {this.futureVehicles()}
                 </div>
-                <Button type="button" onClick={this.addClick.bind(this)} positive>+</Button>
                 <Confirm
                   open={this.state.showConfirmationVehicleEntered}
                   content={"Has the vehicle " + this.state.futureVehicles[this.state.showConfirmationVehicleEnteredIndex] + " really arrived?"}
@@ -348,40 +349,10 @@ class MainPage extends Component {
               </Grid.Column>
 
               <Grid.Column>
-                <Input
-                  style={{ width: 75, margin: 3 }}
-                  maxLength="2"
-                  value={this.state.exitVehicleState}
-                  size='huge'
-                  onChange={event => this.setState({ exitVehicleState: event.target.value })} />
-                <Input
-                  style={{ width: 70, margin: 3 }}
-                  type='numeric'
-                  maxLength="2"
-                  value={this.state.exitVehicleRegion}
-                  size='huge'
-                  onChange={event => this.setState({ exitVehicleRegion: event.target.value })} />
-                <Input
-                  style={{ width: 75, margin: 3 }}
-                  maxLength="2"
-                  value={this.state.exitVehicleTime}
-                  size='huge'
-                  onChange={event => this.setState({ exitVehicleTime: event.target.value })} />
-                <Input
-                  style={{ width: 100, margin: 3 }}
-                  type='numeric'
-                  maxLength="4"
-                  value={this.state.exitVehicleLastNumber}
-                  size='huge'
-                  onChange={event => this.setState({ exitVehicleLastNumber: event.target.value })} />
-
-                <center>
-                  <Button color='green' size='massive' onClick={this.decreasecurrentVehicleCount}>ENTER</Button>
-                </center>
               </Grid.Column>
 
               <Grid.Column>
-                <div style={{ height: '290px', overflowY: 'scroll' }}>
+                <div style={{ height: '200px', overflowY: 'scroll' }}>
                   {this.insideVehicles()}
                 </div>
                 <Confirm
@@ -419,43 +390,13 @@ class MainPage extends Component {
               </Grid.Column>
 
               <Grid.Column>
-                <Input
-                  style={{ width: 75, margin: 3 }}
-                  maxLength="2"
-                  value={this.state.enterVehicleState}
-                  size='huge'
-                  onChange={event => this.setState({ enterVehicleState: event.target.value })} />
-                <Input
-                  style={{ width: 70, margin: 3 }}
-                  type='numeric'
-                  maxLength="2"
-                  value={this.state.enterVehicleRegion}
-                  size='huge'
-                  onChange={event => this.setState({ enterVehicleRegion: event.target.value })} />
-                <Input
-                  style={{ width: 75, margin: 3 }}
-                  maxLength="2"
-                  value={this.state.enterVehicleTime}
-                  size='huge'
-                  onChange={event => this.setState({ enterVehicleTime: event.target.value })} />
-                <Input
-                  style={{ width: 100, margin: 3 }}
-                  type='numeric'
-                  maxLength="4"
-                  value={this.state.enterVehicleLastNumber}
-                  size='huge'
-                  onChange={event => this.setState({ enterVehicleLastNumber: event.target.value })} />
-
-                <center>
-                  <Button color='red' size='massive' onClick={this.decreasecurrentVehicleCount}>EXIT</Button>
-                </center>
               </Grid.Column>
 
               <Grid.Column>
-                <PieChart width={500} height={700}>
+                <PieChart width={500} height={500}>
                   <Legend layout="horizontal" verticalAlign="top" align="center" />
-                  <Pie data={this.state.pieChartData.slice(0, 4)} dataKey="value" outerRadius={200}
-                    innerRadius={150}
+                  <Pie data={this.state.pieChartData.slice(0, 4)} dataKey="value" outerRadius={160}
+                    innerRadius={130}
                     fill="green"
                     label
                     startAngle={180}
